@@ -37,6 +37,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 install_linter.txt
+req.txt
 
 # Unit test / coverage reports
 htmlcov/
