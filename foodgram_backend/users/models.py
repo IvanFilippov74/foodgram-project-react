@@ -9,29 +9,24 @@ class User(AbstractUser):
         help_text='Ваш электронный адрес',
         verbose_name='Электронная почта',
         max_length=254,
-        unique=True,
-        blank=False
+        unique=True
     )
 
     username = models.CharField(
         help_text='Ваш логин',
         verbose_name='Логин',
         max_length=150,
-        unique=True,
-        blank=False
-
+        unique=True
     )
     first_name = models.CharField(
         help_text='Ваше имя',
         verbose_name='Имя',
-        max_length=150,
-        blank=False
+        max_length=150
     )
     last_name = models.CharField(
         help_text='Ваша фамилия',
         verbose_name='Фамилия',
-        max_length=150,
-        blank=False
+        max_length=150
     )
 
     USERNAME_FIELD = 'email'
