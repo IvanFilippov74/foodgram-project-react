@@ -21,7 +21,7 @@ class Command(BaseCommand):
                 try:
                     create_ingredients = Ingredient(
                         name=row[0],
-                        measure_unit=row[1],
+                        measurement_unit=row[1],
                     )
                     ingredients.append(create_ingredients)
                 except ValueError:

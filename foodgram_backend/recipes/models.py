@@ -1,8 +1,8 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from users.models import User
 
-QUERY_SET_LENGTH = 15
+from foodgram_backend.settings import QUERY_SET_LENGTH
+from users.models import User
 
 
 class Ingredient(models.Model):
@@ -11,7 +11,7 @@ class Ingredient(models.Model):
         max_length=200,
         help_text='Название ингредиента'
     )
-    measure_unit = models.CharField(
+    measurement_unit = models.CharField(
         verbose_name='Единица измерения',
         max_length=200,
         help_text='Единица измерения'
@@ -48,8 +48,8 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ('name',)
-        verbose_name = 'Тэг'
-        verbose_name_plural = 'Тэги'
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
     def __str__(self):
         return self.name[:QUERY_SET_LENGTH]
@@ -81,9 +81,10 @@ class Recipe(models.Model):
         Ingredient,
         verbose_name='Ингредиенты рецепта',
         through='RecipeIngredient',
+        related_name='recipes',
         help_text='Ингредиенты рецепта'
     )
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег рецепта',
         related_name='recipes',
@@ -144,3 +145,6 @@ class RecipeIngredient(models.Model):
         ordering = ('recipe',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
+
+    def __str__(self):
+        return f'{self.ingredient} в {self.ingredient.measurement_unit}'

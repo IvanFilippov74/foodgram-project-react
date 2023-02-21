@@ -1,11 +1,10 @@
 from djoser import views
+from recipes.models import Ingredient, Tag
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
-from recipes.models import Tag
 from users.models import User
 
-
-from .serializers import TagSerializer, UserSerializer
+from .serializers import IngredientSerializer, TagSerializer, UserSerializer
 
 
 class UserViewSet(views.UserViewSet):
@@ -16,7 +15,14 @@ class UserViewSet(views.UserViewSet):
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    '''Предствление списка тегов.'''
+    '''Представление списка тегов.'''
+
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    pagination_class = PageNumberPagination
+
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    '''Представление списка ингредиентов.'''
+
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer

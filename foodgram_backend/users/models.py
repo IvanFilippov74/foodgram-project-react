@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from foodgram_backend.settings import QUERY_SET_LENGTH
+
 
 class User(AbstractUser):
     '''User setting model'''
@@ -33,7 +35,9 @@ class User(AbstractUser):
     REQUIRED_FIELDS = 'username', 'first_name', 'last_name'
 
     class Meta:
-        ordering = ['id']
+        ordering = ['username']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
-        return self.first_name[:15], self.last_name[:15]
+        return self.username[:QUERY_SET_LENGTH]
