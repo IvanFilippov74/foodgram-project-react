@@ -129,9 +129,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 duble = Ingredient.objects.get(
                     pk=ingredient.get('id')
                 ).__str__()
-                raise serializers.ValidationError(
-                    {'ingredients': f'Ингредиент, {duble.capitalize()}, выбран более одного раза.'}
-                )
+                raise serializers.ValidationError({
+                    'ingredients': f'Ингредиент, {duble.capitalize()}, '
+                                   f'выбран более одного раза.'
+                })
         return data
 
     def create_ingredients(self, recipe, ingredients):
