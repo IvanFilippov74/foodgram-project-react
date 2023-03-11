@@ -20,8 +20,8 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (RecipeIngredientInline,)
     list_display = ('id', 'name', 'author', 'pub_date', )
-    list_filter = ('author__username', 'name', 'tags')
-    search_fields = ('author__username', 'name', 'tags__name',)
+    list_filter = ('author__username', 'name', 'tags', 'ingredients__name')
+    search_fields = ('author__username', 'name', 'tags__name')
     filter_horizontal = ('tags',)
     empty_value_display = '-пустые поля-'
 

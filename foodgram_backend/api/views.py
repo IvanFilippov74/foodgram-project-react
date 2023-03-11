@@ -5,10 +5,11 @@ from rest_framework.pagination import PageNumberPagination
 from recipes.models import Ingredient, Recipe, Tag  # loc
 from users.models import User  # loc
 from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
-                          RecipeListSerializer, TagSerializer)
+                          RecipeCreateSerializer, RecipeListSerializer,
+                          TagSerializer)
 
 
-class UserViewSet(views.UserViewSet):
+class CustomUserViewSet(views.UserViewSet):
 
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
@@ -33,4 +34,11 @@ class RecipeViewset(viewsets.ModelViewSet):
     '''Представление рецептов'''
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeListSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeListSerializer
+        return RecipeCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

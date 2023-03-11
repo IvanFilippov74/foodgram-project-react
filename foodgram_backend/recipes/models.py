@@ -77,7 +77,7 @@ class Recipe(models.Model):
         verbose_name='Текст рецепта',
         help_text='Текст рецепта'
     )
-    ingredient = models.ManyToManyField(
+    ingredients = models.ManyToManyField(
         Ingredient,
         verbose_name='Ингредиенты рецепта',
         through='RecipeIngredient',
@@ -120,14 +120,14 @@ class RecipeIngredient(models.Model):
         Recipe,
         verbose_name='Рецепт',
         on_delete=models.CASCADE,
-        related_name='ingredients',
+        related_name='ingredient',
         help_text='Рецепт'
     )
     ingredient = models.ForeignKey(
         Ingredient,
         verbose_name='Ингредиент',
         on_delete=models.CASCADE,
-        related_name='ingredients',
+        related_name='ingredient',
         help_text='Ингредиент'
     )
     amount = models.IntegerField(
@@ -145,6 +145,12 @@ class RecipeIngredient(models.Model):
         ordering = ('recipe',)
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient',),
+                name='unique_ingredient',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.ingredient} в {self.ingredient.measurement_unit}'
