@@ -2,7 +2,8 @@ from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag  # loc.
+from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
+                            Tag)  # loc.
 from users.models import User  # loc.
 
 
@@ -19,7 +20,10 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        return False
+        return Follow.objects.filter(
+            author=obj.id,
+            user=self.context.get('request').user
+        ).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -67,7 +71,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
     '''Сериализация списка рецептов.'''
 
     tags = TagSerializer(many=True, read_only=True)
-    author = UserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -91,7 +95,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class CreateIngredientSerializer(serializers.ModelSerializer):
-    '''Сериализатор ингредиентов для создания пользователем рецептов.'''
+    '''Сериализатор ингредиентов, для создания пользователем рецепта.'''
 
     id = serializers.IntegerField()
     amount = serializers.IntegerField()
@@ -177,3 +181,41 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context={
                 'request': self.context.get('request')
             }).data
+
+
+class SubscribeRecipeSerializer(serializers.ModelSerializer):
+    '''Сериализатор отображения рецептов в подписке.'''
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    '''Сериализатор отображения списка подписок.'''
+
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Follow
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed', 'recipes', 'recipes_count'
+        )
+
+    def get_is_subscribed(self, obj):
+        return Follow.objects.filter(author=obj.author, user=obj.user).exists()
+
+    def get_recipes(self, obj):
+        queryset = Recipe.objects.filter(author=obj.author)
+        return SubscribeRecipeSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj.author).count()

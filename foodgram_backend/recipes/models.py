@@ -154,3 +154,30 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} в {self.ingredient.measurement_unit}'
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name='Подписчик',
+        on_delete=models.CASCADE,
+        related_name='follower',
+        help_text='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        related_name='author',
+        help_text='Автор'
+    )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'author',), name='unique_follow'
+            ),
+        ]
