@@ -1,9 +1,9 @@
-from drf_extra_fields.fields import Base64ImageField
 from djoser.serializers import UserCreateSerializer, UserSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import (Follow, Ingredient, Recipe, RecipeIngredient,
-                            Tag)  # loc.
+from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc.
+                            RecipeIngredient, Tag)
 from users.models import User  # loc.
 
 
@@ -90,7 +90,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
         return RecipeIngredientsSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
-        return False
+        if self.context.get('request').user.is_anonymous:
+            return False
+        return FavoriteRecipe.objects.filter(
+            recipe=obj, user=self.context.get('request').user
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         return False

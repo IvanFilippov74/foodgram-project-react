@@ -178,6 +178,35 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=('user', 'author',), name='unique_follow'
+                fields=('user', 'author',),
+                name='unique_follow'
+            ),
+        ]
+
+
+class FavoriteRecipe(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь добавивший рецепт',
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        help_text='Пользователь добавивший рецепт'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Избранный рецепт',
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        help_text='Избранный рецепт'
+    )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe',),
+                name='unique_favorite'
             ),
         ]
