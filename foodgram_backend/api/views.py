@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc
-                            Tag)
+                            ShoppingCart, Tag)
 from users.models import User  # loc
 from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
                           RecipeCreateSerializer, RecipeListSerializer,
@@ -135,5 +135,45 @@ class RecipeViewset(viewsets.ModelViewSet):
                         f'Вы не добавляли рецепт {recipe} в избранное.'}
                 )
             get_favorite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+        permission_classes=[IsAuthenticated]
+    )
+    def shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        get_shopping_cart = ShoppingCart.objects.filter(
+            recipe=recipe, user=request.user
+        )
+        check = ShoppingCart.objects.filter(
+            recipe=recipe, user=request.user
+        ).exists()
+        if request.method == 'POST':
+            if check:
+                return Response(
+                    {'message':
+                        f'Вы уже добавили рецепт {recipe} в список покупок.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            serializer = SubscribeRecipeSerializer(
+                recipe, context={request: 'request'}
+            )
+            ShoppingCart.objects.create(
+                recipe=recipe, user=request.user
+            )
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
+
+        if request.method == 'DELETE':
+            if not check:
+                return Response(
+                    {'message':
+                        f'Вы не добавляли рецепт {recipe} в список покупок.'}
+                )
+            get_shopping_cart.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)

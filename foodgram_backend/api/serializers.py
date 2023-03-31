@@ -3,7 +3,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc.
-                            RecipeIngredient, Tag)
+                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import User  # loc.
 
 
@@ -97,7 +97,11 @@ class RecipeListSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        return False
+        if self.context.get('request').user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            recipe=obj, user=self.context.get('request').user
+        ).exists()
 
 
 class CreateIngredientSerializer(serializers.ModelSerializer):

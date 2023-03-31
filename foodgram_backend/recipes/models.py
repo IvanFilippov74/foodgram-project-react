@@ -210,3 +210,31 @@ class FavoriteRecipe(models.Model):
                 name='unique_favorite'
             ),
         ]
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name='Пользователь добавивший покупки',
+        on_delete=models.CASCADE,
+        related_name='shopping',
+        help_text='Пользователь добавивший покупки'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name='Рецепт для покупок',
+        on_delete=models.CASCADE,
+        related_name='shopping',
+        help_text='Рецепт для покупок'
+    )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Рецепт для покупок'
+        verbose_name_plural = 'Рецепты для покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe',),
+                name='unique_shoppingcart'
+            ),
+        ]
