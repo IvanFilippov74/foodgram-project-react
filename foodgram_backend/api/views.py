@@ -1,5 +1,9 @@
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser import views
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -7,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc
-                            ShoppingCart, Tag)
+                            RecipeIngredient, ShoppingCart, Tag)
 from users.models import User  # loc
 from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
                           RecipeCreateSerializer, RecipeListSerializer,
@@ -177,3 +181,43 @@ class RecipeViewset(viewsets.ModelViewSet):
             get_shopping_cart.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        grocery_list = {}
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__shopping__user=request.user
+        ).values_list(
+            'ingredient__name', 'ingredient__measurement_unit', 'amount'
+        )
+        pdfmetrics.registerFont(
+            TTFont('verdana', 'fonts/verdana.ttf', 'UTF-8'))
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = ('attachment; '
+                                           'filename="grocery_list.pdf"')
+        for ingredient in ingredients:
+            if ingredient[0] not in grocery_list:
+                grocery_list[ingredient[0]] = {
+                    'measurement_unit': ingredient[1],
+                    'amount': ingredient[2]
+                }
+            else:
+                grocery_list[ingredient[0]]['amount'] += ingredient[2]
+        report = canvas.Canvas(response)
+        report.setFont('verdana', 22)
+        report.drawString(20, 800, 'Мой список покупок:')
+        height = 770
+        report.setFont('verdana', 14)
+        for i, (name, data) in enumerate(grocery_list.items(), 1):
+            report.drawString(40, height, (f'{i}. {name.capitalize()} - '
+                                           f'{data["amount"]} '
+                                           f'{data["measurement_unit"]}'))
+            height -= 30
+        report.setFont('verdana', 16)
+        report.setFillColorRGB(0.25, 0.25, 0.25)
+        report.drawCentredString(
+            300, 30, 'Foodgram - Ваш продуктовый помощник.'
+        )
+        report.showPage()
+        report.save()
+        return response
