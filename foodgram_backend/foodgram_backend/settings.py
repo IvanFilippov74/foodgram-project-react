@@ -118,6 +118,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'backend_media')
 QUERY_SET_LENGTH = 50
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],

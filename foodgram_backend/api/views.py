@@ -14,6 +14,7 @@ from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User  # loc
 from .filters import RecipeFilter  # loc
+from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOmly  # loc
 from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
                           RecipeCreateSerializer, RecipeListSerializer,
                           SubscribeRecipeSerializer, SubscribeSerializer,
@@ -81,6 +82,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -89,6 +91,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class RecipeViewset(viewsets.ModelViewSet):
@@ -97,6 +100,7 @@ class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+    permission_classes = (IsAuthorOrAdminOrReadOmly,)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
