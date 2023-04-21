@@ -8,3 +8,4 @@ pillow
 drf-extra-fields
 django-debug-toolbar
 reportlab
+django-filter==2.4.0

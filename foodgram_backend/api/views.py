@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -12,6 +13,7 @@ from rest_framework.response import Response
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User  # loc
+from .filters import RecipeFilter  # loc
 from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
                           RecipeCreateSerializer, RecipeListSerializer,
                           SubscribeRecipeSerializer, SubscribeSerializer,
@@ -93,6 +95,8 @@ class RecipeViewset(viewsets.ModelViewSet):
     '''Представление рецептов'''
 
     queryset = Recipe.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
