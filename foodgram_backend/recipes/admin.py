@@ -20,9 +20,9 @@ class IngredientAdmin(admin.ModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (RecipeIngredientInline,)
-    list_display = ('id', 'name', 'author', 'pub_date', 'get_favorite_count')
-    list_filter = ('author__username', 'name', 'tags')
-    search_fields = ('author__username', 'name', 'tags__name')
+    list_display = ('id', 'name', 'author', 'pub_date', 'get_favorite_count',)
+    list_filter = ('author__username', 'name', 'tags',)
+    search_fields = ('author__username', 'name', 'tags__name',)
     filter_horizontal = ('tags',)
     empty_value_display = '-пустые поля-'
 
@@ -40,9 +40,9 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_follow')
+    list_display = ('id', 'get_follow',)
     list_filter = ('author',)
-    search_fields = ('author__username', 'user__username')
+    search_fields = ('author__username', 'user__username',)
 
     def get_follow(self, obj):
         return (f'Пользователь {str(obj.user).capitalize()} '
@@ -53,8 +53,8 @@ class FollowAdmin(admin.ModelAdmin):
 
 @admin.register(FavoriteRecipe)
 class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_favorite')
-    search_fields = ('recipe__name', 'user__username')
+    list_display = ('id', 'get_favorite',)
+    search_fields = ('recipe__name', 'user__username',)
 
     def get_favorite(self, obj):
         return f'"{obj.recipe}" добавлен пользователем {obj.user}.'
@@ -64,7 +64,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_shopping')
+    list_display = ('id', 'get_shopping',)
     list_filter = ('recipe',)
     search_fields = ('recipe__name',)
 

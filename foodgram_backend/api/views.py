@@ -10,12 +10,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,  # loc
+from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
-from users.models import User  # loc
-from .filters import RecipeFilter  # loc
-from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOmly  # loc
-from .serializers import (CustomUserSerializer, IngredientSerializer,  # loc
+from users.models import User
+from .filters import RecipeFilter
+from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOmly
+from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeListSerializer,
                           SubscribeRecipeSerializer, SubscribeSerializer,
                           TagSerializer)
