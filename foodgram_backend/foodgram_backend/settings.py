@@ -8,11 +8,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='xxx')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default=['*'])
 
-INTERNAL_IPS = ['127.0.0.1']
+INTERNAL_IPS = os.getenv('INTERNAL_IPS', default=['127.0.0.1'])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -22,13 +22,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'debug_toolbar',
-    'api.apps.ApiConfig',
-    'recipes.apps.RecipesConfig',
-    'users.apps.UsersConfig',
+
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
     'django_filters',
+
+    'api.apps.ApiConfig',
+    'recipes.apps.RecipesConfig',
+    'users.apps.UsersConfig',
 ]
 
 MIDDLEWARE = [
@@ -131,18 +133,7 @@ DJOSER = {
     },
     "PERMISSIONS":
         {
-            "activation": ["rest_framework.permissions.AllowAny"],
-            "password_reset": ["rest_framework.permissions.AllowAny"],
-            "password_reset_confirm": ["rest_framework.permissions.AllowAny"],
-            "set_password": ["djoser.permissions.CurrentUserOrAdmin"],
-            "username_reset": ["rest_framework.permissions.AllowAny"],
-            "username_reset_confirm": ["rest_framework.permissions.AllowAny"],
-            "set_username": ["djoser.permissions.CurrentUserOrAdmin"],
-            "user_create": ["rest_framework.permissions.AllowAny"],
-            "user_delete": ["djoser.permissions.CurrentUserOrAdmin"],
             "user": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
             "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
-            "token_create": ["rest_framework.permissions.AllowAny"],
-            "token_destroy": ["rest_framework.permissions.IsAuthenticated"],
     },
 }

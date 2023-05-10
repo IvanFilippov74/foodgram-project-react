@@ -23,7 +23,7 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return self.name[:QUERY_SET_LENGTH]
+        return self.name[:QUERY_SET_LENGTH].capitalize()
 
 
 class Tag(models.Model):

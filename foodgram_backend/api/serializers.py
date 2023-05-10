@@ -90,18 +90,28 @@ class RecipeListSerializer(serializers.ModelSerializer):
         return RecipeIngredientsSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
-        if self.context.get('request').user.is_anonymous:
+        try:
+            if self.context.get('request').user.is_anonymous:
+                return False
+            return obj.favorit
+        except AttributeError:
+            return FavoriteRecipe.objects.filter(
+                recipe=obj, user=self.context.get('request').user
+            ).exists()
+        except Exception:
             return False
-        return FavoriteRecipe.objects.filter(
-            recipe=obj, user=self.context.get('request').user
-        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        if self.context.get('request').user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            recipe=obj, user=self.context.get('request').user
-        ).exists()
+        try:
+            if self.context.get('request').user.is_anonymous:
+                return False
+            return obj.shoppings
+        except AttributeError:
+            return ShoppingCart.objects.filter(
+                recipe=obj, user=self.context.get('request').user
+            ).exists()
+        except Exception:
+            False
 
 
 class CreateIngredientSerializer(serializers.ModelSerializer):
@@ -135,29 +145,30 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = data.get('ingredients')
         ingredients_list = [ingredient.get('id') for ingredient in ingredients]
         for ingredient in ingredients:
-            if not Ingredient.objects.filter(pk=ingredient.get('id')).exists():
+            if ingredient.get('id') > Ingredient.objects.count():
                 raise serializers.ValidationError(
                     {'ingredients': 'Такого ингредиента не существует.'}
                 )
             if ingredients_list.count(ingredient['id']) > 1:
                 duble = Ingredient.objects.get(
                     pk=ingredient.get('id')
-                ).__str__()
+                )
                 raise serializers.ValidationError({
-                    'ingredients': f'Ингредиент, {duble.capitalize()}, '
+                    'ingredients': f'Ингредиент, {duble}, '
                                    f'выбран более одного раза.'
                 })
         return data
 
     def create_ingredients(self, recipe, ingredients):
+        ingredients_list = []
         for ingredient in ingredients:
-            RecipeIngredient.objects.bulk_create([
-                RecipeIngredient(
-                    recipe=recipe,
-                    ingredient=Ingredient.objects.get(pk=ingredient.get('id')),
-                    amount=ingredient.get('amount'),
-                )
-            ])
+            create_ingredients = RecipeIngredient(
+                recipe=recipe,
+                ingredient=Ingredient.objects.get(pk=ingredient.get('id')),
+                amount=ingredient.get('amount'),
+            )
+            ingredients_list.append(create_ingredients)
+        RecipeIngredient.objects.bulk_create(ingredients_list)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
