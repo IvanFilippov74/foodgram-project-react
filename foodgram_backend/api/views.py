@@ -4,7 +4,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
@@ -14,12 +13,12 @@ from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
 from .filters import RecipeFilter
+from .mixins import ListViewSet
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
-from .serializers import TagSerializer
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeListSerializer,
                           SubscribeRecipeSerializer, SubscribeSerializer,
-                          SubscribeUserSerializer)
+                          SubscribeUserSerializer, TagSerializer)
 from .utils import delete, post, render_pdf
 
 
@@ -48,18 +47,14 @@ class SubscribeView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SubscriptionsList(ListAPIView):
+class SubscriptionsList(ListViewSet):
     '''Представление списка подписок пользователя.'''
 
+    serializer_class = SubscribeSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request):
-        subscribes = Follow.objects.filter(user=request.user)
-        pages = self.paginate_queryset(subscribes)
-        serializer = SubscribeSerializer(
-            pages, many=True, context={request: 'request'}
-        )
-        return self.get_paginated_response(serializer.data)
+    def get_queryset(self):
+        return Follow.objects.filter(user=self.request.user)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
