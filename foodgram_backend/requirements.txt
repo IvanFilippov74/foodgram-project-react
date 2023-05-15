@@ -4,7 +4,7 @@ gunicorn==20.0.4
 psycopg2-binary
 python-dotenv
 djoser
-pillow==8.3.1
+pillow==9.2.0
 drf-extra-fields
 django-debug-toolbar
 reportlab
