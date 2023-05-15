@@ -5,7 +5,8 @@ from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,7 +18,8 @@ from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import TagSerializer
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeListSerializer,
-                          SubscribeRecipeSerializer, SubscribeSerializer)
+                          SubscribeRecipeSerializer, SubscribeSerializer,
+                          SubscribeUserSerializer)
 from .utils import delete, post, render_pdf
 
 
@@ -33,39 +35,15 @@ class SubscribeView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request, user_id):
-        author = get_object_or_404(User, id=user_id)
-        check = Follow.objects.filter(
-            user=request.user, author=author
-        ).exists()
-        if author != request.user and not check:
-            subscribes = Follow.objects.create(
-                user=request.user, author=author
-            )
-            serializer = SubscribeSerializer(
-                subscribes, context={request: 'request'}
-            )
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
-        if check:
-            return Response(
-                {'message': 'Вы уже подписаны на данного пользователя.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response(
-            {'message': 'Вы не можете оформлять подписки на себя.'},
-            status=status.HTTP_400_BAD_REQUEST,
+        serializer = SubscribeUserSerializer(
+            data={'user': request.user.id, 'author': user_id}
         )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, user_id):
-        follow = Follow.objects.filter(user=request.user, author=user_id)
-        if not Follow.objects.filter(
-            user=request.user, author=user_id
-        ).exists():
-            return Response(
-                {'message': 'Вы не подписанны на этот профиль.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        follow = get_object_or_404(Follow, author=user_id, user=request.user)
         follow.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -108,28 +86,17 @@ class RecipeViewset(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = (IsAuthorOrReadOnly,)
 
     def get_queryset(self):
-        params = self.request.query_params
-        queryset = self.queryset
-        if params:
-            if 'is_favorited' in params:
-                follow_bool = Recipe.objects.filter(
-                    favorite__user=self.request.user
-                )
-                queryset = queryset.annotate(favorit=Exists(follow_bool))
-            if 'is_in_shopping_cart' in params:
-                shopping_bool = Recipe.objects.filter(
-                    shopping__user=self.request.user
-                )
-                queryset = queryset.annotate(shoppings=Exists(shopping_bool))
-        return queryset
+        return self.queryset.annotate(
+            favorit=Exists(self.queryset),
+            shoppings=Exists(self.queryset)
+        )
 
     def get_permissions(self):
         if self.request.user.is_superuser:
             return (IsAdminOrReadOnly(),)
-        return super().get_permissions()
+        return (IsAuthorOrReadOnly() or IsAuthenticatedOrReadOnly(),)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

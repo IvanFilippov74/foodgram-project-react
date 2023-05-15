@@ -1,4 +1,6 @@
-from django.http import HttpResponse
+import io
+
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -45,11 +47,9 @@ def delete(request, pk, get_object, models):
 
 def render_pdf(ingredients):
     grocery_list = {}
+    download = io.BytesIO()
     pdfmetrics.registerFont(
         TTFont('verdana', 'fonts/verdana.ttf', 'UTF-8'))
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = ('attachment; '
-                                       'filename="grocery_list.pdf"')
     for ingredient in ingredients:
         if ingredient[0] not in grocery_list:
             grocery_list[ingredient[0]] = {
@@ -58,7 +58,7 @@ def render_pdf(ingredients):
             }
         else:
             grocery_list[ingredient[0]]['amount'] += ingredient[2]
-    report = canvas.Canvas(response)
+    report = canvas.Canvas(download)
     report.setFont('verdana', 22)
     report.drawString(20, 800, 'Мой список покупок:')
     height = 770
@@ -75,4 +75,8 @@ def render_pdf(ingredients):
     )
     report.showPage()
     report.save()
-    return response
+    download.seek(0)
+    return FileResponse(
+        download,
+        as_attachment=True,
+        filename='grocery_list.pdf',)

@@ -1,5 +1,6 @@
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
 
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
@@ -240,3 +241,31 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()
+
+
+class SubscribeUserSerializer(serializers.ModelSerializer):
+    '''Сериалайзер функционала создания и отмены, подписки на пользователя.'''
+
+    class Meta:
+        model = Follow
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'author',),
+                message='Вы уже подписаны на данного пользователя'
+            )
+        ]
+
+    def validate(self, data):
+        if data.get('user') == data.get('author'):
+            raise serializers.ValidationError(
+                'Вы не можете оформлять подписки на себя.'
+            )
+        return data
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        return SubscribeSerializer(
+            instance, context={'request': request}
+        ).data
