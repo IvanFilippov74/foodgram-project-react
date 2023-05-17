@@ -1,3 +1,4 @@
+from django.http import FileResponse
 from django.db.models import Exists
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -78,14 +79,15 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewset(viewsets.ModelViewSet):
     '''Представление рецептов'''
 
-    queryset = Recipe.objects.all()
+    #permission_classes = [IsAuthorOrReadOnly | IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     def get_queryset(self):
-        return self.queryset.annotate(
-            favorit=Exists(self.queryset),
-            shoppings=Exists(self.queryset)
+        queryset = Recipe.objects.all()
+        return queryset.annotate(
+            favorit=Exists(queryset),
+            shoppings=Exists(queryset)
         )
 
     def get_permissions(self):
@@ -138,4 +140,7 @@ class RecipeViewset(viewsets.ModelViewSet):
         ).values_list(
             'ingredient__name', 'ingredient__measurement_unit', 'amount'
         )
-        return render_pdf(ingredients)
+        return FileResponse(
+            render_pdf(ingredients),
+            as_attachment=True,
+            filename='grocery_list.pdf',)

@@ -76,7 +76,4 @@ def render_pdf(ingredients):
     report.showPage()
     report.save()
     download.seek(0)
-    return FileResponse(
-        download,
-        as_attachment=True,
-        filename='grocery_list.pdf',)
+    return download
