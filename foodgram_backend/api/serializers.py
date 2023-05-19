@@ -145,8 +145,9 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
         ingredients = data.get('ingredients')
         ingredients_list = [ingredient.get('id') for ingredient in ingredients]
+        count = Ingredient.objects.count()
         for ingredient in ingredients:
-            if ingredient.get('id') > Ingredient.objects.count():
+            if ingredient.get('id') > count:
                 raise serializers.ValidationError(
                     {'ingredients': 'Такого ингредиента не существует.'}
                 )
@@ -165,7 +166,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             create_ingredients = RecipeIngredient(
                 recipe=recipe,
-                ingredient_id=ingredient.get('id'), #Ingredient.objects.get(pk=ingredient.get('id')),
+                ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
             )
             ingredients_list.append(create_ingredients)

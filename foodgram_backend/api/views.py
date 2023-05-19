@@ -1,12 +1,11 @@
-from django.http import FileResponse
 from django.db.models import Exists
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -79,7 +78,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewset(viewsets.ModelViewSet):
     '''Представление рецептов'''
 
-    #permission_classes = [IsAuthorOrReadOnly | IsAdminOrReadOnly]
+    permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
@@ -89,11 +88,6 @@ class RecipeViewset(viewsets.ModelViewSet):
             favorit=Exists(queryset),
             shoppings=Exists(queryset)
         )
-
-    def get_permissions(self):
-        if self.request.user.is_superuser:
-            return (IsAdminOrReadOnly(),)
-        return (IsAuthorOrReadOnly() or IsAuthenticatedOrReadOnly(),)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
