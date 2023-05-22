@@ -44,7 +44,7 @@ jobs:
         uses: docker/build-push-action@v2 
         with:
           context: ./foodgram_backend/
-          file: ./foodgram_backend/Dockerfile
+          # file: ./foodgram_backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/gates:v1.01
 
