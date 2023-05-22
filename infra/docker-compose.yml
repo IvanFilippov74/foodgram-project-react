@@ -2,9 +2,7 @@ version: '3.3'
 services:
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: chelyabinezzz/frontend_foodgram:v1.01
     volumes:
       - ../frontend/:/app/result_build/
 
@@ -18,7 +16,7 @@ services:
       - ./.env
 
   backend:
-    build: ../foodgram_backend
+    image: chelyabinezzz/gates:v1.01
     restart: always
     volumes:
       - static_value:/app/backend_static/
