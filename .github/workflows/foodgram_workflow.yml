@@ -40,8 +40,8 @@ jobs:
       - name: Push to Docker Hub
         uses: docker/build-push-action@v2 
         with:
-          context: foodgram_backend/
-          file: foodgram_backend/Dockerfile
+          context: ./foodgram_backend
+          file: ./foodgram_backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/gates:v1.01
 
@@ -75,7 +75,7 @@ jobs:
 
   send_message_to_telegramm:
     runs-on: ubuntu-latest
-    needs: deploy
+    needs: deploy # build_and_push_to_docker_hub
     steps:
     - name: send message
       uses: appleboy/telegram-action@master
