@@ -3,8 +3,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
-                            RecipeIngredient, ShoppingCart, Tag)
+from recipes.models import Follow, Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import User
 
 
@@ -75,9 +74,13 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField(read_only=True)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientsSerializer(many=True, source='ingredient')
+    is_favorited = serializers.BooleanField(
+        default=False, read_only=True, source='favorit'
+    )
+    is_in_shopping_cart = serializers.BooleanField(
+        default=False, read_only=True, source='shoppings'
+    )
 
     class Meta:
         model = Recipe
@@ -85,34 +88,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'id', 'tags', 'author', 'ingredients', 'is_favorited',
             'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time'
         )
-
-    def get_ingredients(self, obj):
-        queryset = RecipeIngredient.objects.filter(recipe=obj)
-        return RecipeIngredientsSerializer(queryset, many=True).data
-
-    def get_is_favorited(self, obj):
-        try:
-            if self.context.get('request').user.is_anonymous:
-                return False
-            return obj.favorit
-        except AttributeError:
-            return FavoriteRecipe.objects.filter(
-                recipe=obj, user=self.context.get('request').user
-            ).exists()
-        except Exception:
-            return False
-
-    def get_is_in_shopping_cart(self, obj):
-        try:
-            if self.context.get('request').user.is_anonymous:
-                return False
-            return obj.shoppings
-        except AttributeError:
-            return ShoppingCart.objects.filter(
-                recipe=obj, user=self.context.get('request').user
-            ).exists()
-        except Exception:
-            False
 
 
 class CreateIngredientSerializer(serializers.ModelSerializer):

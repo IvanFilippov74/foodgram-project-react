@@ -1,7 +1,6 @@
-from django.db.models import Exists
+from django.db.models import Exists, OuterRef
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,7 +11,6 @@ from rest_framework.views import APIView
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
-from .filters import RecipeFilter
 from .mixins import ListViewSet
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
@@ -79,14 +77,35 @@ class RecipeViewset(viewsets.ModelViewSet):
     '''Представление рецептов'''
 
     permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
 
     def get_queryset(self):
-        queryset = Recipe.objects.all()
+        queryset = Recipe.objects.select_related(
+            'author').prefetch_related('tags')
+        favorited = self.request.query_params.get('is_favorited')
+        shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        author = self.request.query_params.get('author')
+        tags = self.request.query_params.getlist('tags')
+        if favorited:
+            queryset = queryset.filter(favorite__user=self.request.user)
+        if shopping_cart:
+            queryset = queryset.filter(shopping__user=self.request.user)
+        if author:
+            queryset = queryset.filter(author=author)
+        if tags:
+            queryset = queryset.filter(tags__slug__in=tags).distinct()
         return queryset.annotate(
-            favorit=Exists(queryset),
-            shoppings=Exists(queryset)
+            favorit=Exists(
+                queryset.filter(
+                    favorite__user=self.request.user,
+                    favorite__recipe=OuterRef('id'),
+                )
+            ),
+            shoppings=Exists(
+                queryset.filter(
+                    shopping__user=self.request.user,
+                    shopping__recipe=OuterRef('id'),
+                )
+            ),
         )
 
     def get_serializer_class(self):
