@@ -1,5 +1,5 @@
 ## FoodGram - Продуктовый помощник
-[![foodgram](https://github.com/IvanFilippov74/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/IvanFilippov74/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
+[![yamdb_final](https://github.com/IvanFilippov74/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)](https://github.com/IvanFilippov74/yamdb_final/actions/workflows/yamdb_workflow.yml)
 
 ### Описание:
 На сервисе FoodGram пользователи смогут публиковать рецепты, подписываться на публикации других пользователей, добавлять понравившиеся рецепты в список «Избранное», а перед походом в магазин скачивать сводный список продуктов, необходимых для приготовления одного или нескольких выбранных блюд.
@@ -9,9 +9,6 @@
 - Реализован REST API.
 - Работа API совместно с фронтендом разработанном на технологии React.
 - Поддерживает методы GET, POST, PUT, PATCH, DELETE.
-
-### Ресурсы
-
 
 ### Пользовательские роли и права доступа:
 Анонимные пользователи:
@@ -41,11 +38,11 @@
 Суперюзер Django обладает правами администратора, пользователя с правами admin.
 ### Как запустить проект:
 1. Склонировать репозиторий в командной строке:
-```
+```bash
 https://github.com/IvanFilippov74/foodgram-project-react.git
 ```
 Затем перейдите в корневую директорию проекта:
-```
+```bash
 cd foodgram-project-react/
 ```
 2. В директории infra/ создайте файл .env, и заполните его:
@@ -65,30 +62,31 @@ https://docs.docker.com/engine/install/
 ```
 4. Перейдите в директорию ```infra```:
 
-```
+```bash
 cd infra/
 ```
 Затем запустите docker-compose, используя команду*:
-```
+```bash
 docker-compose up -d
 ```
 5. Создайте миграции командой:
-```
+```bash
 docker-compose exec web python manage.py migrate
 ```
 6. Подгрузите статику:
-```
+```bash
 docker-compose exec web python manage.py collectstatic --no-input
 ```
 7. Создайте супер пользователя:
-```
+```bash
 docker-compose exec web python manage.py createsuperuser
 ```
 8. Проект доступен по адресу ```http://localhost/```, для админ-панели используйте ```http://localhost/admin/```, документацию по api можно посмотреть здесь > ```http://localhost/redoc/```.
 9. Остановить запущенные контейнеры можно командой ```docker-compose stop```, вновь запустить ```docker-compose start```, для остановки и удаления контейнеров используйте команду ```docker-compose down -v```.
  
 *Важное примечание для ОС Linux используйте команду ```sudo```.
-
+- http://158.160.17.229/admin/ - админ-зона.
+- http://158.160.17.229/redoc/ - документация к API.
 ###  Авторы:
 Филиппов Иван
 <a href="https://github.com/IvanFilippov74"><img src="https://img.shields.io/badge/-GitHub-464646?style=flat-square&logo=Github"></a>
