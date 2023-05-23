@@ -1,6 +1,7 @@
 from django.db.models import Exists, OuterRef
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from rest_framework import filters
 from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -71,6 +72,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewset(viewsets.ModelViewSet):
