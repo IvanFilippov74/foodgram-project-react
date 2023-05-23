@@ -1,7 +1,6 @@
 from django.db.models import Exists, OuterRef
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
-from rest_framework import filters
 from djoser import views
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -12,6 +11,7 @@ from rest_framework.views import APIView
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
+from .filters import IngredientSearchFilter
 from .mixins import ListViewSet
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
@@ -72,7 +72,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = (IngredientSearchFilter,)
     search_fields = ('^name',)
 
 
