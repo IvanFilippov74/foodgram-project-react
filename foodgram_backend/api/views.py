@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from recipes.models import (FavoriteRecipe, Follow, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart, Tag)
 from users.models import User
+from .filters import IngredientSearchFilter
 from .mixins import ListViewSet
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
@@ -71,6 +72,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     pagination_class = None
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (IngredientSearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewset(viewsets.ModelViewSet):
