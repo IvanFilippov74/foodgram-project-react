@@ -16,8 +16,7 @@ services:
       - ./.env
 
   backend:
-    build: ../foodgram_backend
-    #image: chelyabinezzz/gates:v1.01
+    image: chelyabinezzz/gates:v1.01
     restart: always
     volumes:
       - static_value:/app/backend_static/
