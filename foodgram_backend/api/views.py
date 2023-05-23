@@ -96,20 +96,22 @@ class RecipeViewset(viewsets.ModelViewSet):
             queryset = queryset.filter(author=author)
         if tags:
             queryset = queryset.filter(tags__slug__in=tags).distinct()
-        return queryset.annotate(
-            favorit=Exists(
-                queryset.filter(
-                    favorite__user=self.request.user,
-                    favorite__recipe=OuterRef('id'),
-                )
-            ),
-            shoppings=Exists(
-                queryset.filter(
-                    shopping__user=self.request.user,
-                    shopping__recipe=OuterRef('id'),
-                )
-            ),
-        )
+        if self.request.user.is_authenticated:
+            return queryset.annotate(
+                favorit=Exists(
+                    queryset.filter(
+                        favorite__user=self.request.user,
+                        favorite__recipe=OuterRef('id'),
+                    )
+                ),
+                shoppings=Exists(
+                    queryset.filter(
+                        shopping__user=self.request.user,
+                        shopping__recipe=OuterRef('id'),
+                    )
+                ),
+            )
+        return queryset
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
