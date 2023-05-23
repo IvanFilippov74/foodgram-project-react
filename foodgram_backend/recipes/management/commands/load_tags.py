@@ -6,7 +6,7 @@ import csv
 
 from django.core.management.base import BaseCommand
 
-from recipes.models import Ingredient
+from recipes.models import Tag
 
 
 class Command(BaseCommand):
@@ -14,17 +14,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with open(
-            './data/ingredients.csv', 'r', encoding='utf-8'
+            './data/tag.csv', 'r', encoding='utf-8'
         ) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
-            ingredients = []
+            tags = []
             for row in csv_reader:
                 try:
-                    create_ingredients = Ingredient(
+                    create_tags = Tag(
                         name=row[0],
-                        measurement_unit=row[1],
+                        color=row[1],
+                        slug=row[2],
                     )
-                    ingredients.append(create_ingredients)
+                    tags.append(create_tags)
                 except ValueError:
                     print('Несоответствие данных игнорировано.')
-            Ingredient.objects.bulk_create(ingredients)
+            Tag.objects.bulk_create(tags)
