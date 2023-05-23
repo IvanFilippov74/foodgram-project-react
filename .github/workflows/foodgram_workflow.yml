@@ -74,9 +74,6 @@ jobs:
             sudo docker-compose up -d --build
             sudo docker-compose exec -T backend python manage.py migrate
             sudo docker-compose exec -T backend python manage.py collectstatic --no-input
-            sudo docker-compose exec -T backend python manage.py load_ingredients
-            sudo docker-compose exec -T backend python manage.py load_tags
-
 
   send_message_to_telegramm:
     runs-on: ubuntu-latest
