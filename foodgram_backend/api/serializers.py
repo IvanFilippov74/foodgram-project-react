@@ -116,7 +116,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         name = data.get('name')
         if len(name) > 200:
             raise serializers.ValidationError(
-                {'name': 'Название рецепта превышает 200 символов.'}
+                'Название рецепта превышает 200 символов.'
             )
         ingredients = data.get('ingredients')
         ingredients_list = [ingredient.get('id') for ingredient in ingredients]
@@ -124,16 +124,24 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if ingredient.get('id') > count:
                 raise serializers.ValidationError(
-                    {'ingredients': 'Такого ингредиента не существует.'}
+                    'Такого ингредиента не существует.'
                 )
             if ingredients_list.count(ingredient['id']) > 1:
                 duble = Ingredient.objects.get(
                     pk=ingredient.get('id')
                 )
-                raise serializers.ValidationError({
-                    'ingredients': f'Ингредиент, {duble}, '
-                                   f'выбран более одного раза.'
-                })
+                raise serializers.ValidationError(
+                    f'Ингредиент, {duble}, '
+                    f'выбран более одного раза.'
+                )
+            if ingredient.get('amount') <= 0:
+                zero = Ingredient.objects.get(
+                    pk=ingredient.get('id')
+                )
+                raise serializers.ValidationError(
+                    f'Ингредиент, {zero}, '
+                    f'имеет количество 0 или меньше.'
+                )
         return data
 
     def create_ingredients(self, recipe, ingredients):
