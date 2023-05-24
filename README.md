@@ -92,11 +92,6 @@ docker-compose  exec  web  python  manage.py  load_ingredients
 - http://158.160.17.229/admin/ - админ-зона.
 - http://158.160.17.229/redoc/ - документация к API.
 
-Авторизация в админ-зону:
-```
-email: admin@admin.com
-password: admin
-```
 ### Авторы:
 Филиппов Иван
 <a  href="https://github.com/IvanFilippov74"><img  src="https://img.shields.io/badge/-GitHub-464646?style=flat-square&logo=Github"></a>
